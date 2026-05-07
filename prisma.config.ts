@@ -14,6 +14,7 @@ export default defineConfig({
     },
     // datasource : prisma가 데이터베이스에 접근할 때 사용하는 정보를 지정
     datasource: {
+
         url: DATABASE_URL,
     },
 });
