@@ -1,6 +1,9 @@
 import { UserCreateInput } from "../generated/prisma/models/User.ts";
 import prisma from "../config/prisma.ts";
 import { Prisma } from "../generated/prisma/client.ts";
+import { LoginInputType } from "../schemas/user/login.ts";
+import { catch } from "zod/mini";
+import passwordUtil from "../utils/password/passwordUtil.ts";
 
 const createUser = async (data: UserCreateInput) => {
     try {
@@ -38,6 +41,7 @@ const createUser = async (data: UserCreateInput) => {
             }
         }
 
+
         throw new Error("UNKNOWN_ERROR"); // return과 같은데 값을 리턴하는게 아니라 에러를 리턴하는 키워드
     }
     // 컨트롤러에서 만들어진 newUser를 받아서, prisma를 통해 DB에 저장
@@ -47,6 +51,34 @@ const createUser = async (data: UserCreateInput) => {
     // await 키워드를 생략함. 대신 async는 빼면 안됨.
 };
 
+
+const login  = async  (data: LoginInputType) => {
+    try {
+        // prisma.테비을.findUnique() : SELECT 명령 (단, Unique 칼럼을 통해)
+        // findUnique라는 메서드는 객체 1개만 리턴
+        // find라는 메서드는 Array가 리턴
+        const user = await prisma.user.findUnique({
+            where: {
+                username: data.username,
+            },
+        });
+
+        if (!user || user.deletedAt) {
+        throw new Error("INVALID_CREDENTIALS");
+    }
+
+      const isValid = await passwordUtil.verifyPassword(data.password, user.password);
+        if (!isValid) {
+            throw new Error("INVALID_CREDENTIALS");
+        }
+
+        // 아이디와 비밀번호가 일치하는 정보가 있다는 뜻
+
+    } catch (error) {
+
+    }
+}
 export default {
     createUser,
+    login,
 };

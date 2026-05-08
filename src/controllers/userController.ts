@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import { UserCreateInput } from "../generated/prisma/models/User.ts";
 import UserService from "../services/userService.ts";
 import passwordUtil from "../utils/password/passwordUtil.ts";
+import userService from "../services/userService.ts";
+import {LoginInputType} from "../schemas/user/login.ts";
 
 const createUser = async (req: Request, res: Response) => {
     try {
@@ -62,4 +64,19 @@ const createUser = async (req: Request, res: Response) => {
     }
 };
 
-export default { createUser };
+const login = (req: Request,res: Response) => {
+    // Login 이라는 기능은, 들어온 비밀번호 값과 데이터베이스에서 조회해서 가져온 비밀번호 값을
+    // 비교해야 함.
+    // 뭔가를 Controller에서 해주기 보다,DB에 값을 가져오는게 우선되므로
+    // 그냥 service 로 바로 보냄
+    const loginData: LoginInputType = req.body;
+
+    const result = userService.login(loginData);
+
+
+
+
+}
+
+export default { createUser
+,login};
