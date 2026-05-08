@@ -3,6 +3,7 @@ import prisma from "../config/prisma.ts";
 import { Prisma } from "../generated/prisma/client.ts";
 import { LoginInputType } from "../schemas/user/login.ts";
 import passwordUtil from "../utils/password/passwordUtil.ts";
+import jwtUtil from "../utils/jwt/jwtUtil.ts";
 
 const createUser = async (data: UserCreateInput) => {
     try {
@@ -18,7 +19,7 @@ const createUser = async (data: UserCreateInput) => {
                 // error.meta?.target에 들어있는데 이프로퍼티 타입은 string[] | undefined
                 const errorMessage = error.message;
 
-               // 예시: target = ["username", "nickname"]
+                // 예시: target = ["username", "nickname"]
                 // array의 요소 중 "이 값"이 있는지 확인하는 메서드는 .includes()
                 // .find()와 비슷한 역할이지만,
                 // find는 조건을 걷어서 찾을 수 있는 메서드이고
@@ -28,7 +29,7 @@ const createUser = async (data: UserCreateInput) => {
                     // 상위 함수로 던지는데,
                     // 새로운 자바스크립트 표준 에러 객체를 만들어서 던짐.
                     // 내용에 "ALREADY_EXISTS_USERNAME"이라고 담아서.
-                    throw new Error("ALREADY_EXISTS_USERNAME")
+                    throw new Error("ALREADY_EXISTS_USERNAME");
                 }
                 if (errorMessage.includes("email")) {
                     throw new Error("ALREADY_EXISTS_EMAIL");
@@ -40,7 +41,6 @@ const createUser = async (data: UserCreateInput) => {
             }
         }
 
-
         throw new Error("UNKNOWN_ERROR"); // return과 같은데 값을 리턴하는게 아니라 에러를 리턴하는 키워드
     }
     // 컨트롤러에서 만들어진 newUser를 받아서, prisma를 통해 DB에 저장
@@ -50,8 +50,7 @@ const createUser = async (data: UserCreateInput) => {
     // await 키워드를 생략함. 대신 async는 빼면 안됨.
 };
 
-
-const login  = async  (data: LoginInputType) => {
+const login = async (data: LoginInputType) => {
     try {
         // prisma.테비을.findUnique() : SELECT 명령 (단, Unique 칼럼을 통해)
         // findUnique라는 메서드는 객체 1개만 리턴
@@ -63,20 +62,26 @@ const login  = async  (data: LoginInputType) => {
         });
 
         if (!user || user.deletedAt) {
-        throw new Error("INVALID_CREDENTIALS");
-    }
+            throw new Error("INVALID_CREDENTIALS");
+        }
 
-      const isValid = await passwordUtil.verifyPassword(data.password, user.password);
+        const isValid = await passwordUtil.verifyPassword(data.password, user.password);
         if (!isValid) {
             throw new Error("INVALID_CREDENTIALS");
         }
 
         // 아이디와 비밀번호가 일치하는 정보가 있다는 뜻
+        const token = jwtUtil.generateToken(user.id);
 
-    } catch (error) {
+        // password와 deletedAt라는 항목을 response(응답)에 포함시킬 필요 없엇, 그걸 제외한 나머지만 safeUserInfo에 저장
+        const { password, deletedAt, ...safeUserInfo } = user;
 
-    }
-}
+        return {
+            user: safeUserInfo,
+            token,
+        };
+    } catch (error) {}
+};
 export default {
     createUser,
     login,
