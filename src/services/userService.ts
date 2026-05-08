@@ -2,7 +2,6 @@ import { UserCreateInput } from "../generated/prisma/models/User.ts";
 import prisma from "../config/prisma.ts";
 import { Prisma } from "../generated/prisma/client.ts";
 import { LoginInputType } from "../schemas/user/login.ts";
-import { catch } from "zod/mini";
 import passwordUtil from "../utils/password/passwordUtil.ts";
 
 const createUser = async (data: UserCreateInput) => {
