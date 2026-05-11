@@ -78,7 +78,17 @@ const login = async (req: Request, res: Response) => {
             message: "로그인에 성공했습니다.",
             data: result,
         });
-    } catch (error) {}
+    } catch (error) {
+        if (error instanceof Error) {
+            if (error.message === "INVALID_CREDENTIALS") {
+                res.status(401).json({ message: "아이디 또는 비밀번호가 일치하지 않습니다." });
+                return;
+            }
+        }
+
+        console.log(error);
+        res.status(500).json({ message: "로그인 처리 중 서버 에러가 발생했습니다." });
+    }
 };
 
 export default { createUser, login };

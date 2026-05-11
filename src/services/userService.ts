@@ -51,7 +51,6 @@ const createUser = async (data: UserCreateInput) => {
 };
 
 const login = async (data: LoginInputType) => {
-    try {
         // prisma.테비을.findUnique() : SELECT 명령 (단, Unique 칼럼을 통해)
         // findUnique라는 메서드는 객체 1개만 리턴
         // find라는 메서드는 Array가 리턴
@@ -80,7 +79,7 @@ const login = async (data: LoginInputType) => {
             user: safeUserInfo,
             token,
         };
-    } catch (error) {}
+
 };
 export default {
     createUser,
