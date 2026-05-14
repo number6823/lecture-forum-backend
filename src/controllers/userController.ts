@@ -28,6 +28,7 @@ const createUser = async (req: Request, res: Response) => {
         };
         const newUser = await UserService.createUser(userData);
 
+
         // 여기서부터는 응답(Response) 처리
         // res라는, 앞으로 응답에 나갈 박스에
         // status code를 201 (생성 작업 성공의 코드) 로 하고
@@ -42,13 +43,13 @@ const createUser = async (req: Request, res: Response) => {
         if (error instanceof Error) {
             switch (error.message) {
                 case "ALREADY_EXISTS_USERNAME":
-                    res.status(409).json({ error: "이미 사용 중인 아이디입니다. " });
+                    res.status(409).json({ message: "이미 사용 중인 아이디입니다. " });
                     return;
                 case "ALREADY_EXISTS_EMAIL":
-                    res.status(409).json({ error: "이미 가입된 이메일입니다. " });
+                    res.status(409).json({ message: "이미 가입된 이메일입니다. " });
                     return;
                 case "ALREADY_EXISTS_NICKNAME":
-                    res.status(409).json({ error: "이미 사용 중인 닉네임입니다." });
+                    res.status(409).json({ message: "이미 사용 중인 닉네임입니다." });
                     return;
                 default:
                     console.log(error);

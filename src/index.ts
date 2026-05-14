@@ -3,12 +3,19 @@ import express from "express";
 import * as console from "node:console";
 import * as process from "node:process";
 import userRouter from "./routes/userRouter.ts";
+import cors from "cors";
 
 dotenv.config();
+
 
 const app = express();
 
 const PORT = process.env.PORT || "8080";
+
+// 교차 출처 리소스 공유 (CORS)를 허용하는건 백엔드에서 증명하여 허용해야 함
+// cors() 만 사용하면 모든 프론트엔드 주소에 대해 허용 증명을 하는 것
+// cors({ origin: "주소" }) 를 통해 특정 주소에 대해서만 허용 증명을 할 수 있음
+app.use(cors());
 
 // express 앱에 기능을 확장할 때에는 app.use() 메서드를 사용
 
@@ -19,7 +26,7 @@ app.use(express.json());
 // URL은 한글을 원래 포함할 수 없기 떄문에 변환을 하게 되는데, 그것을 한글로 받아들일 수 있도록 하는 기능
 app.use(express.urlencoded({ extended: true }));
 
-// 프론트엔드가 하는 요청(Request)에 대하여 경로 Routing 등록
+// 프론트엔드가 하는 요청(Request)에 /user 로 들어오면 userRouter 파일 목록을 불러와서 라우팅 처리를 할거야
 app.use("/user", userRouter);
 
 app.listen(PORT, () => {
