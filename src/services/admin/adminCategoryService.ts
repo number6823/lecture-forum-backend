@@ -15,6 +15,19 @@ const geCategoryList = async () => {
     });
 };
 
+const getCategoryById = async (id: number) => {
+    const category = prisma.category.findUnique({
+        where: {
+            id,
+        }
+    });
+
+    if (!category) {
+        throw new Error("Category_NOT_FOUND");
+    }
+    return category;
+}
+
 const createCategory = async (input: CategoryCreateInput) => {
     try {
         // 생성 작업을 마친 prisma는 생성한 그 데이터를 리턴함
@@ -84,4 +97,5 @@ export default {
     createCategory,
     toggleCategoryStatus,
     updateCategory,
+    getCategoryById,
 };

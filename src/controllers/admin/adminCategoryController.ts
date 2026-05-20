@@ -6,6 +6,7 @@ import {
 } from "../../generated/prisma/models/Category.ts";
 import { AdminCreateCategoryInputType } from "../../schemas/adimn/categoty/createCategory.ts";
 import { CategoryStatus } from "../../generated/prisma/enums.ts";
+import AdminCategoryService from "../../services/admin/adminCategoryService.ts";
 const getCategoryList = async (req: Request, res: Response) => {
     try {
         const result = await adminCategoryService.geCategoryList();
@@ -19,6 +20,33 @@ const getCategoryList = async (req: Request, res: Response) => {
         res.status(500).json({ message: "카테고리 목록 조회 중 서버 에러가 발생되었습니다." });
     }
 };
+
+// id 값을 기준으로 검색하는 API
+const getCategoryById = async (req: Request<{id: string}>, res: Response) => {
+    try {
+        const id = Number(req.params.id);
+        if (isNaN(id)) {
+            res.status(400).json({message: "유효하지 않은 카테고리 ID 입니다."});
+            return;
+        }
+
+        const category = await AdminCategoryService.getCategoryById(id);
+
+        res.status(200).json({message:"카테고리를 성공적으로 불러왔습니다.",
+        data: category,
+        });
+    } catch (error) {
+        if (error instanceof Error && error.message === "CATEGORY_NOT_FOUND") {
+            res.status(404).json({
+                message:"존재하지 않는 카테고리입니다.",
+            });
+            return;
+        }
+        res.status(500).json({
+            message:"서버 에러가 발생되었습니다.",
+        });
+    }
+}
 
 const createCategory = async (req: Request, res: Response) => {
     try {
@@ -115,6 +143,7 @@ const updateCategory = async (req: Request<{ id: string }>, res: Response) => {
 };
 
 export default {
+    getCategoryById,
     getCategoryList,
     createCategory,
     toggleCategoryStatus,
