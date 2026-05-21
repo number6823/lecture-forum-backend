@@ -15,7 +15,7 @@ const generateToken = (userId: number) => {
 
 
 // jsonwebtoken 개발자는, "니가 만든 신분증이 튀어나올꺼니까, JwtPayload 수정해서 써"
-const verifyToken = async (token: string) => {
+const verifyToken = (token: string) => {
     // jst.verify(토큰,열쇠) : 암호화된 토큰을 복호화하는 메소드. 리턴값은  jwtPayload = {}
     return jwt.verify(token, SECRET_KEY) as DecodedToken;
 }

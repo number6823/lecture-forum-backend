@@ -5,6 +5,7 @@ import * as process from "node:process";
 import userRouter from "./routes/userRouter.ts";
 import cors from "cors";
 import adminRouter from "./routes/admin/adminRouter.ts";
+import { authenticate, requireAdmin } from "./middlewares/auth.ts";
 
 dotenv.config();
 
@@ -29,7 +30,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // 프론트엔드가 하는 요청(Request)에 /user 로 들어오면 userRouter 파일 목록을 불러와서 라우팅 처리를 할거야
 app.use("/user", userRouter);
-app.use("/admin", adminRouter);
+app.use("/admin", authenticate,requireAdmin,adminRouter);
 
 app.listen(PORT, () => {
     console.log(`서버 실행됨! http://localhost:${PORT}`);
