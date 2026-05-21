@@ -49,6 +49,18 @@ const createUser = async (data: UserCreateInput) => {
     // create(비동기함수)를 생성하면 User 객체가 반환되는데, 그걸 바로 return 시킬거면
     // await 키워드를 생략함. 대신 async는 빼면 안됨.
 };
+const getUserById = async (id: number) => {
+    const user = await prisma.user.findUnique({
+        where: {
+            id,
+        }
+    });
+    if (!user) {
+        throw new Error("USER_NOT_FOUND");
+    }
+
+    return user;
+}
 
 const login = async (data: LoginInputType) => {
         // prisma.테비을.findUnique() : SELECT 명령 (단, Unique 칼럼을 통해)
@@ -84,4 +96,5 @@ const login = async (data: LoginInputType) => {
 export default {
     createUser,
     login,
+    getUserById,
 };

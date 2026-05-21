@@ -1,9 +1,8 @@
 import { Request, Response, NextFunction } from "express";
-import { token } from "morgan";
 import jwtUtil from "../utils/jwt/jwtUtil.ts";
-import prisma from "../config/prisma.ts";
 import jwt from "jsonwebtoken";
 import { RoleType, User } from "../generated/prisma/client.ts";
+import userService from "../services/userService.ts";
 
 interface AuthRequest extends Request {
     user?: User
@@ -42,11 +41,8 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
         }
 
         const decoded = jwtUtil.verifyToken(token); // decoded = { id: ? }
-        const user = await prisma.user.findUnique({
-            where: {
-                id: decoded.id,
-            },
-        });
+
+        const user = await userService.getUserById(decoded.id);
 
 
         if (!user || user.deletedAt) {
