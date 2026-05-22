@@ -26,3 +26,4 @@ export const validate = (schema: ZodType) => {
         next();
     };
 };
+

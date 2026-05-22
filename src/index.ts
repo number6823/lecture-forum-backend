@@ -18,7 +18,7 @@ const PORT = process.env.PORT || "8080";
 // cors() 만 사용하면 모든 프론트엔드 주소에 대해 허용 증명을 하는 것
 // cors({ origin: "주소" }) 를 통해 특정 주소에 대해서만 허용 증명을 할 수 있음
 app.use(cors({origin: "http://localhost:5173", credentials: true}));
--+
+
 // express 앱에 기능을 확장할 때에는 app.use() 메서드를 사용
 
 // express.json() : 요청(Request)의 본문(body)에서 JSON 데이터를 객체로 변환(피싱)하여 request.body 에 저장
@@ -30,7 +30,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // 프론트엔드가 하는 요청(Request)에 /user 로 들어오면 userRouter 파일 목록을 불러와서 라우팅 처리를 할거야
 app.use("/user", userRouter);
-app.use("/admin", authenticate,requireAdmin,adminRouter);
+app.use("/admin", adminRouter);
 
 app.listen(PORT, () => {
     console.log(`서버 실행됨! http://localhost:${PORT}`);

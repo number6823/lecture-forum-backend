@@ -57,7 +57,7 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
         // 2. 그 Authorization의 값이 `Bearer ㅜ머뭐뭐`를 들어오는지, 그뭠뭐뭐가 있으면 그 값을 받아옴
         // authorization 프로퍼티의 값 타입은 string 이기 댸문에 startWith() 메서드를 사용해서 확인
         // startWith() 메서드 : string 타입에서 사용가능. 매개변수에 집어넣어준 문자열로 시작되는지 확인하는 메서드
-        // 3. 모무머가 내가 발급한 토근이 맞는지 검증
+        // 3. 뭐뭐뭐가 내가 발급한 토근이 맞는지 검증
         // 4. 그 토론 안에 있는 내용을 까봐서, 그기록된 사용자가 현재 살아있는 사용자인지 확인하고 (DB와의 통신 필요)
         //5. 살아있는 사용자라면 허용
     } catch (error) {
@@ -76,7 +76,7 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
     }
 };
 
-export const requireAdmin = (req: AuthRequest,res: Response, next: NextFunction) => {
+export  const requiredAdmin = (req: AuthRequest,res: Response, next: NextFunction) => {
     // 그렇게 확인해온 user 정보 중, user.role === "ADMIN"인가만 판별하는 기능만 탑재
     // 이걸 구현하기 위해서 user 정보를 꺼내야 되는데, 지금 당장은 가져올 곳이 없음
     // requiredAdmin이라는  함수는 다른 정보에는 접근이 불가능하지만, 매개변수로 들어오는 req,res,next는 쓸 수있음
