@@ -7,7 +7,11 @@ import { AdminUpdateUserInputType } from "../../../schemas/admin/user/updateUser
 
 const getUserList = async (req: Request, res: Response) => {
     try {
-        const users = await adminUserService.getUserList();
+        // 쿼리 스트링은 있을 수도 있고 없을 수도 있음. 그리고 형변환도 안될 수 있음
+        const page = Number(req.query.page) || 1;
+        const size = Number(req.query.size) || 20;
+
+        const users = await adminUserService.getUserList(page, size);
         res.status(200).json({
             message: "유저 목록을 성공적으로 불러왔습니다.",
             data: users,
@@ -24,13 +28,14 @@ const getUserById = async (req: Request<{ id: string }>, res: Response) => {
     try {
         const id = Number(req.params.id);
         if (isNaN(id)) {
-            res.status(404).json({
+            res.status(400).json({
                 message: "유효하지 않은 사용자 ID입니다.",
             });
             return;
         }
 
         const user = await adminUserService.getUserById(id);
+
         res.status(200).json({
             message: "유저 정보를 성공적으로 불러왔습니다.",
             data: user,
@@ -50,13 +55,12 @@ const createUser = async (req: Request, res: Response) => {
         // 2. 타입이 안 맞음. birthdate가 string으로 옴. 이걸 Date 타입으로 바꿔줘야 함
 
         // 프론트엔드에서 전달된 값들이 들어있는 req.body의 타입은?
-
-        const { password, birthdate, phoneNumber, ...restDate }: AdminCreateUserInputType =
+        const { password, birthdate, phoneNumber, ...restData }: AdminCreateUserInputType =
             req.body;
 
         // 데이터베이스에서 생성할 때 집어넣을 내용으로 변환
         const newUser: UserCreateInput = {
-            ...restDate,
+            ...restData,
             password: await passwordUtil.hashPassword(password),
             phoneNumber: phoneNumber ?? null, // phoneNumber가 있으면 그 값을 쓰고, 없으면 null
             birthdate: birthdate ? new Date(birthdate) : null,
@@ -72,27 +76,25 @@ const createUser = async (req: Request, res: Response) => {
         if (error instanceof Error) {
             switch (error.message) {
                 case "ALREADY_EXISTS_USERNAME":
-                    res.status(409).json({ message: "이미 사용 중인 아이디입니다. " });
+                    res.status(409).json({ message: "이미 사용 중인 아이디입니다." });
                     return;
                 case "ALREADY_EXISTS_EMAIL":
-                    res.status(409).json({ message: "이미 가입된 이메일입니다. " });
+                    res.status(409).json({ message: "이미 가입된 이메일입니다." });
                     return;
                 case "ALREADY_EXISTS_NICKNAME":
                     res.status(409).json({ message: "이미 사용 중인 닉네임입니다." });
                     return;
                 default:
                     console.log(error);
-                    res.status(500).json({ message: "유저 생성 중 오류가 발생했습니다" });
+                    res.status(500).json({ message: "유저 생성 중 오류가 발생했습니다." });
             }
         }
 
-        // username이 겹칠 떄
-        // nickname이 겹칠 때
-        // email이 겹칠 때
         console.log(error);
         res.status(500).json({ message: "유저 생성 중 오류가 발생했습니다." });
     }
 };
+
 const updateUser = async (req: Request<{ id: string }>, res: Response) => {
     try {
         const id = Number(req.params.id);
@@ -101,12 +103,12 @@ const updateUser = async (req: Request<{ id: string }>, res: Response) => {
             return;
         }
 
-        const { password, birthdate, phoneNumber, ...restDate }: AdminUpdateUserInputType =
+        const { password, birthdate, phoneNumber, ...restData }: AdminUpdateUserInputType =
             req.body;
 
         // 데이터베이스에서 생성할 때 집어넣을 내용으로 변환
         const newUser: UserUpdateInput = {
-            ...restDate,
+            ...restData,
         };
 
         // 업데이트할 데이터에 null을 집어넣어버리면,
@@ -118,7 +120,7 @@ const updateUser = async (req: Request<{ id: string }>, res: Response) => {
             newUser.phoneNumber = phoneNumber;
         }
         if (birthdate) {
-            newUser.birthdate = birthdate;
+            newUser.birthdate = new Date(birthdate);
         }
 
         const result = await adminUserService.updateUser(newUser, id);
@@ -131,13 +133,13 @@ const updateUser = async (req: Request<{ id: string }>, res: Response) => {
         if (error instanceof Error) {
             switch (error.message) {
                 case "USER_NOT_FOUND":
-                    res.status(404).json({ message: "사용자를 찾을 수 없습니다." });
+                    res.status(404).json({ message: "사용자를 찾을 수 없습니다. " });
                     return;
                 case "ALREADY_EXISTS_USERNAME":
                     res.status(409).json({ message: "이미 사용 중인 아이디입니다." });
                     return;
                 case "ALREADY_EXISTS_EMAIL":
-                    res.status(409).json({ message: "이미 가입된 이메일 입니다." });
+                    res.status(409).json({ message: "이미 가입된 이메일입니다." });
                     return;
                 case "ALREADY_EXISTS_NICKNAME":
                     res.status(409).json({ message: "이미 사용 중인 닉네임입니다." });
@@ -147,6 +149,7 @@ const updateUser = async (req: Request<{ id: string }>, res: Response) => {
         res.status(500).json({ message: "서버 에러가 발생했습니다." });
     }
 };
+
 // Type 옆에 <> 를 붙여서 하는건 "Generic Type" 이라고 함
 const toggleUser = async (req: Request<{ id: string }>, res: Response) => {
     try {
@@ -158,7 +161,10 @@ const toggleUser = async (req: Request<{ id: string }>, res: Response) => {
         }
 
         const deletedUser = await adminUserService.toggleUser(id);
-        res.status(200).json({ message: "유저가 성공적으로 삭제되었습니다.", data: deletedUser });
+        res.status(200).json({
+            message: "유저가 성공적으로 삭제되었습니다.",
+            data: deletedUser,
+        });
     } catch (error) {
         if (error instanceof Error) {
             if (error.message === "USER_NOT_FOUND") {
