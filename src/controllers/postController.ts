@@ -35,6 +35,26 @@ const getPostsByCategory = async (req: Request<{ categoryId: string }>, res: Res
     }
 };
 
+const getPostById = async (req: Request, res: Response) => {
+    try {
+        const postId = Number(req.params.id);
+        if (isNaN(postId)) {
+            res.status(400).json({ message: "유효하지 않은  게시글 ID 입니다." });
+            return;
+        }
+        const post = await postService.getPostById(postId);
+        res.status(200).json({
+            message: "게시글을 성공적으로 불러왔습니다.",
+            data: post,
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            message: "서버 에러가 발생했습니다.",
+        });
+    }
+};
+
 const createPost = async (req: AuthRequest, res: Response) => {
     // req.body 에 들어온 값들을 꺼내서, 서비스로 보내줘야 함
     // 즉,req.body로 들어온 내용을 토대로 데이터베이스에 쓸 수 있는 타입 객체로 바꿔서 보내야 함
@@ -80,4 +100,5 @@ const createPost = async (req: AuthRequest, res: Response) => {
 export default {
     getPostsByCategory,
     createPost,
+    getPostById,
 };
