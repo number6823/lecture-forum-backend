@@ -2,13 +2,13 @@ import { Router } from "express";
 import postController from "../controllers/postController.ts";
 import { validate } from "../middlewares/validate.ts";
 import { createPostSchema } from "../schemas/post/createPostSchema.ts";
-import { authenticate } from "../middlewares/auth.ts";
+import { authenticate, checkUser } from "../middlewares/auth.ts";
 
 
 const router =  Router();
 
 router.get("/list/:categoryId", postController.getPostsByCategory );
-router.get("/:id",postController.getPostById);
+router.get("/:id", checkUser,postController.getPostById);
 router.post("/create", authenticate,validate(createPostSchema),postController.createPost);
 
 

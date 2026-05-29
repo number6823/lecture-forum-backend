@@ -35,14 +35,20 @@ const getPostsByCategory = async (req: Request<{ categoryId: string }>, res: Res
     }
 };
 
-const getPostById = async (req: Request, res: Response) => {
+const getPostById = async (req: AuthRequest<{ id: string }>, res: Response) => {
+    // 원래, 글 내용 조회라는 기능엔 "조회하는 사람이 누군가"는 중요하지 않았음
+    // 근데 "조회하는 사람이" 투표를 했나 안 했나를 알기 위해서는 "그 사람이" 누군가를 알아야 함
+
+    // 글의 내용을 요청하는 사람에 대한 정보를 알기 위해서는 어디에 접근해야 하는가?
     try {
         const postId = Number(req.params.id);
         if (isNaN(postId)) {
             res.status(400).json({ message: "유효하지 않은  게시글 ID 입니다." });
             return;
         }
-        const post = await postService.getPostById(postId);
+        const userId = req.user?.id;
+        const post = await postService.getPostById(postId,userId);
+
         res.status(200).json({
             message: "게시글을 성공적으로 불러왔습니다.",
             data: post,

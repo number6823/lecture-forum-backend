@@ -3,9 +3,24 @@ import jwtUtil from "../utils/jwt/jwtUtil.ts";
 import jwt from "jsonwebtoken";
 import { RoleType, User } from "../generated/prisma/client.ts";
 import userService from "../services/userService.ts";
+import * as core from "express-serve-static-core";
 
-export interface AuthRequest extends Request {
-    user?: User
+
+// 이렇게 Express의 기본 인터페이스인 Request를 상속받아
+// user라고 하는 항목을 덧붙인 AuthRequest를 만들었는데
+// Request라는 Express 기본 타입은 Generic Type임
+// 그렇기 때문에 우리가 그 Request 타입을 쓸 때 Request<{id :string}>라고 쓰는게 가능했음
+// 이렇게 제네릭을 통해 Request에 제공되는 {id :string} 은
+// req.params (동적 라우팅)을 통해 경로에 추가로 들어오는 값을 나타내줬던 것
+// 우리가 만든 AuthRequest는 상속은 받았지만, 제네릭은 아님
+export interface AuthRequest<
+    P = core.ParamsDictionary,
+    ResBody = any,
+    ReqBody = any,
+    ReqQuery = core.Query,
+    Locals extends Record<string, any> = Record<string, any>,
+> extends Request<P, ResBody, ReqBody, ReqQuery,Locals> {
+    user?: User;
 }
 
 // middleware로 사용할 녀석의 함수 매개변수는
@@ -74,6 +89,36 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
     }
 };
 
+export const checkUser = async (req: AuthRequest, res: Response, next: NextFunction) => {
+    // 탈락시키는 일은 안함
+    // 로그인 정보(토큰)이 헤더에 있으면 req.user에 정보를 담는 역할
+    try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+            // 헤더를 봤더니 내용이 없었어? 그럼 그냥 컨트롤러로 가
+            return next();
+        }
+        const token = authHeader.split(" ")[1];
+        if (!token) {
+            // 헤더에 Authorization 항목은 있는데 "Bearer <토큰>"이 형식이 아니야? 그럼 그냥 컨트롤러로 가
+            return next();
+        }
+        const decoded = jwtUtil.verifyToken(token);
+
+        const user = await userService.getUserById(decoded.id);
+
+        if (!user || user.deletedAt) {
+            // 가지고 온 토큰을 검증하고, 사용자 정보를 확인 했는데 없어? 그럼 그냥 컨트롤러로 가
+            return next();
+        }
+        req.user = user;
+
+        next();
+    } catch (error) {
+        // 뭔가 위에서 에러가 발생했어? 그럼 그냥 컨트롤러로 가
+        next();
+    }
+};
 
 export const requiredAdmin = (req: AuthRequest, res: Response, next: NextFunction) => {
     // 그렇게 확인해온 user 정보 중, user.role === "ADMIN"인가만 판별하는 기능만 탑재
@@ -85,12 +130,12 @@ export const requiredAdmin = (req: AuthRequest, res: Response, next: NextFunctio
     // 그럼. authenticate를 할 때, 사용자 정보(user)를 req에 넣자
 
     if (!req.user) {
-        res.status(401).json({ message: "인증 정보가 없습니다. 먼저 로그인 해주세요."});
+        res.status(401).json({ message: "인증 정보가 없습니다. 먼저 로그인 해주세요." });
         return;
     }
     if (req.user.role !== RoleType.ADMIN) {
-        res.status(403).json({ message : "해당 기능에 접근할 수 있는 관리자 권한이 없습니다. "});
+        res.status(403).json({ message: "해당 기능에 접근할 수 있는 관리자 권한이 없습니다. " });
         return;
     }
     next();
-}
+};
