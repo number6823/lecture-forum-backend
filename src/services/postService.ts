@@ -116,8 +116,46 @@ const createPost = async (postData: PostCreateInput) => {
     });
 };
 
+const votePost = async (postId: number, userId: number, option: number) => {
+    // 1. postId의 글의 존재 유무(소프트삭제돟 고려)
+    const post = await prisma.post.findFirst({
+        where: {
+            id: postId,
+            deletedAt: null,
+        },
+    });
+
+    if (!post) {
+        throw new Error("NOT FOUND");
+    }
+
+    // 2. option1Text와 option2Text가 있는지 체크
+    if (!post.option1Text || !post.option2Text) {
+        throw new Error("NOT_VOTABLE");
+    }
+
+    // 3. 이 사용자가 투표를 이미 진행했는지 체크
+    const existingVote = await prisma.vote.findUnique({
+        where: {
+            userId_postId: { userId, postId },
+        },
+    });
+    if (!existingVote) {
+        throw new Error("ALREADY_VOTED");
+    }
+
+    return  prisma.vote.create({
+        data: {
+            userId,
+            postId,
+            option,
+        },
+    });
+};
+
 export default {
     getPostsByCategory,
     createPost,
     getPostById,
+    votePost,
 };
