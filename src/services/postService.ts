@@ -140,7 +140,7 @@ const votePost = async (postId: number, userId: number, option: number) => {
             userId_postId: { userId, postId },
         },
     });
-    if (!existingVote) {
+    if (existingVote) {
         throw new Error("ALREADY_VOTED");
     }
 
