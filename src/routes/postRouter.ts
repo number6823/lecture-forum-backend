@@ -11,7 +11,9 @@ const router =  Router();
 router.get("/list/:categoryId", postController.getPostsByCategory );
 router.get("/:id", checkUser,postController.getPostById);
 router.post("/create", authenticate,validate(createPostSchema),postController.createPost);
+
 router.post("/:postId/vote", authenticate, validate(votePostSchema), postController.votePost);
+router.delete("/:postId/vote",authenticate,postController.cancelVotePost);
 
 
 export default router;
