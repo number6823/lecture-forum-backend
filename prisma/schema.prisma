@@ -53,8 +53,9 @@ model User {
   gender      GenderType
   role        RoleType   @default(USER) // 삽입할 때 기본값으로 USER 기록
 
-  posts Post[]
-  votes Vote[]
+  posts   Post[]
+  votes   Vote[]
+  replies Reply[]
 }
 
 model Category {
@@ -91,6 +92,7 @@ model Post {
   categoryId Int
   category   Category @relation(fields: [categoryId], references: [id])
   votes      Vote[]
+  replice    Reply[]
 
   @@index([userId])
   @@index([categoryId])
@@ -124,3 +126,22 @@ model Vote {
   @@index([postId]) // foreign key
   @@index([userId]) // foreign key
 }
+
+model Reply {
+  id       Int      @id @default(autoincrement())
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+  content  String   @db.Text
+  userId   Int
+  user     User     @relation(fields: [userId], references: [id])
+  postId   Int
+  post     Post     @relation(fields: [postId], references: [id])
+
+  @@index([userId])
+  @@index([postId])
+}
+
+// 데이터베이스 (SQL 데이터베이스) 의 칼럼에 값은 1개 값만 들어갈 수 있음
+// 그렇게 적은 reply 테이블의 user라는 항목(칼럼)과 post라는 항목(칼럼)의 타입은 객체 타입
+// 즉, user와 post라는 항목의 타입인 객체는 데이터베이스에 들어갈 수 없음
+// 쟤네는 userId값을 가지고 User 테이블에서 데이터를 검색해와서 Prisma가 넣어주는(JOIN) 항목임

@@ -1,0 +1,39 @@
+import prisma from "../config/prisma.ts";
+
+const createReply = async (userId: number, postId: number, content: string) => {
+    // 이 댓글이 달릴 글이 살아있는 글인가를 체크를 먼저 함
+    // 그러면 왜 userId 살아있는 사용자는 체크 안하나요?
+    // 왜냐하면, authenticate 미들웨어가 이미 사용자는 살아있는지 체크를 했기 때문
+    const post = await prisma.post.findFirst({
+        where: {
+            id: postId,
+            deletedAt: null,
+        },
+    });
+
+    if (!post) {
+        throw new Error("NOT_FOUND");
+    }
+
+    return prisma.reply.create({
+        data: {
+            userId,
+            postId,
+            content,
+        },
+        include: {
+            user: {
+                select: {
+                    id: true,
+                    nickname: true,
+                    email: true,
+                }
+            }
+        }
+    });
+    // 이렇게 prisma.reply.create()를 실행하면, 생성"된" Reply 객체가 리턴
+};
+
+export default {
+    createReply,
+};
