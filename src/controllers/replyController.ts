@@ -3,6 +3,29 @@ import { AuthRequest } from "../middlewares/auth.ts";
 import { CreateReplyInputType } from "../schemas/reply/createReplySchema.ts";
 import replyService from "../services/replyService.ts";
 
+const getRepliesByPostId = async (req: Request<{ postId: string }>, res: Response) => {
+    // service에 전달되어야 되는 값이 postId,page,size
+    try {
+        const postId = Number(req.params.postId);
+        if (isNaN(postId)) {
+            res.status(400).send({
+                message: "유효하지 않은 게시물 ID 입니다.",
+            });
+            return;
+        }
+        const page = Number(req.query.page) || 1;
+        const size = Number(req.query.size) || 1;
+
+        const result = await replyService.getRepliesByPostId(postId, page, size);
+        res.status(200).json({ message: "댓글 목록을 성공적으로 불러왔습니다.", data: result });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            message: "댓글 목록을 불러오는 중에 오류가 발생했습니다.",
+        });
+    }
+};
+
 const createReply = async (req: AuthRequest, res: Response) => {
     try {
         if (!req.user) {
@@ -12,7 +35,7 @@ const createReply = async (req: AuthRequest, res: Response) => {
         const userId = req.user.id;
         const { postId, content }: CreateReplyInputType = req.body;
 
-        const result = await replyService.createReply(postId, userId, content);
+        const result = await replyService.createReply(userId, postId, content);
 
         return res.status(201).json({
             message: "댓글이 성공적으로 작성되었습니다.",
@@ -35,4 +58,5 @@ const createReply = async (req: AuthRequest, res: Response) => {
 
 export default {
     createReply,
+    getRepliesByPostId,
 };

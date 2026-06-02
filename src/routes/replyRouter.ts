@@ -6,7 +6,7 @@ import { createReplySchema } from "../schemas/reply/createReplySchema.ts";
 
 const router = Router();
 
-
+router.get("/:postId", replyController.getRepliesByPostId);
 router.post("/create",authenticate,validate(createReplySchema), replyController.createReply);
 
 export default router;
