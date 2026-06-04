@@ -128,14 +128,14 @@ model Vote {
 }
 
 model Reply {
-  id       Int      @id @default(autoincrement())
-  createAt DateTime @default(now())
-  updateAt DateTime @updatedAt
-  content  String   @db.Text
-  userId   Int
-  user     User     @relation(fields: [userId], references: [id])
-  postId   Int
-  post     Post     @relation(fields: [postId], references: [id])
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  content   String   @db.Text
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  postId    Int
+  post      Post     @relation(fields: [postId], references: [id])
 
   @@index([userId])
   @@index([postId])

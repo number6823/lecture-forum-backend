@@ -8,5 +8,6 @@ const router = Router();
 
 router.get("/:postId", replyController.getRepliesByPostId);
 router.post("/create",authenticate,validate(createReplySchema), replyController.createReply);
+router.delete("/:replyId", authenticate, replyController.deleteReply);
 
 export default router;

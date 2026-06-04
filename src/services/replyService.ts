@@ -30,7 +30,7 @@ const getRepliesByPostId = async (postId: number, page: number, size: number) =>
         size,
         total,
         list,
-    }
+    };
 };
 
 const createReply = async (userId: number, postId: number, content: string) => {
@@ -67,7 +67,28 @@ const createReply = async (userId: number, postId: number, content: string) => {
     // 이렇게 prisma.reply.create()를 실행하면, 생성"된" Reply 객체가 리턴
 };
 
+const deleteReply = async (id: number, userId: number) => {
+    const reply = await prisma.reply.findUnique({
+        where: {
+            id,
+        },
+    });
+    if (!reply) {
+        throw new Error("NOT_FOUND_REPLY");
+    }
+    if (reply.userId !== userId) {
+        throw new Error("FORBIDDEN");
+    }
+
+    return prisma.reply.delete({
+        where: {
+            id,
+        },
+    });
+};
+
 export default {
     createReply,
     getRepliesByPostId,
+    deleteReply,
 };
