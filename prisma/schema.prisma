@@ -141,6 +141,16 @@ model Reply {
   @@index([postId])
 }
 
+model Notice {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  title     String
+  content   String   @db.Text
+
+  // Post에는 글쓴이가 필요하니까 User와 관계를 맺었지만, Notice는 관계를 맺지 않아도 됨
+}
+
 // 데이터베이스 (SQL 데이터베이스) 의 칼럼에 값은 1개 값만 들어갈 수 있음
 // 그렇게 적은 reply 테이블의 user라는 항목(칼럼)과 post라는 항목(칼럼)의 타입은 객체 타입
 // 즉, user와 post라는 항목의 타입인 객체는 데이터베이스에 들어갈 수 없음
