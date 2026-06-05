@@ -94,14 +94,22 @@ async function seedPosts() {
                     user: { connect: { id: user.id } },
                 };
 
-                await postService.createPost(dummyData);
-                console.log(
-                    `[${i}/${postsPerCategory} : 카테고리ID(${category.id})] 게시글 등록 성공`,
-                );
+                try {
+                    await postService.createPost(dummyData);
+                    console.log(
+                        `[${i}/${postsPerCategory} : 카테고리ID(${category.id})] 게시글 등록 성공`,
+                    );
+                } catch (error) {
+                    console.log(
+                        `[${i}/${postsPerCategory} : 카테고리ID(${category.id})] 게시글 등록 실패`,
+                    );
+                }
             }
         }
     } catch (error) {
         console.log("시딩 작업 중 오류가 발생되었습니다.");
+    } finally {
+        await prisma.$disconnect();  // 데이터베이스 연결을 끊는 메서드
     }
 }
 
