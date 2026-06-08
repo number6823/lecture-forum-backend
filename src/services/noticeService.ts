@@ -36,6 +36,25 @@ const updateNotice = async (id: number, title: string, content: string) => {
     });
 };
 
+const getNoticeList = async (page: number, size: number) => {
+    // prisma에게 페이지네이션을 하기 위해
+    // skip과 take를 전달해줘야 하는데
+    // take는 말 그대로 가져와야 되는 갯수를 뜻하고
+    // skip은 데이터르 지나치는 갯수를 뜻함
+    // (냐가 3페이지를 보고 싶으니, 30개 데이터 이후의 15개를 갸져와라)
+    const list = prisma.notice.findMany({
+        orderBy: { id: "desc" },
+        skip: (page - 1) * size,
+        take: size,
+    });
+    const total = await prisma.notice.count();
+
+    return {
+        total,
+        list,
+    };
+};
+
 const deleteNotice = async (id: number) => {
     // Notice 글이 살아있는지 체크
     await getNoticeById(id);
@@ -49,6 +68,7 @@ const deleteNotice = async (id: number) => {
 
 export default {
     createNotice,
+    getNoticeList,
     updateNotice,
     getNoticeById,
     deleteNotice,

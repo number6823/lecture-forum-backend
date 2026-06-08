@@ -6,6 +6,7 @@ import adminRouter from "./routes/admin/adminRouter.ts";
 import categoryRouter from "./routes/categoryRouter.ts";
 import postRouter from "./routes/postRouter.ts";
 import replyRouter from "./routes/replyRouter.ts";
+import noticeRouter from "./routes/noticeRouter.ts";
 
 dotenv.config();
 
@@ -32,6 +33,7 @@ app.use("/user", userRouter);
 app.use("/admin", adminRouter);
 app.use("/category", categoryRouter);
 app.use("/reply", replyRouter);
+app.use("/notice", noticeRouter);
 app.use("/post", postRouter);
 
 app.listen(PORT, () => {
