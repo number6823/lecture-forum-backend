@@ -14,7 +14,7 @@ const getNoticeById = async (req: Request<{ noticeId: string }>, res: Response) 
         const result = await noticeService.getNoticeById(id);
         res.status(200).json({
             message: "공지사항 목록 조회 성공",
-            date: result,
+            data: result,
         });
     } catch (error) {
         console.log(error);
@@ -32,10 +32,13 @@ const getNoticeList = async (req: Request, res: Response) => {
         const result = await noticeService.getNoticeList(page, size);
 
         res.status(200).json({
-            page,
-            size,
-            total: result.total,
-            list: result.list,
+            message: "공지사항 목록 조회 성공",
+            data: {
+                page,
+                size,
+                total: result.total,
+                list: result.list,
+            },
         });
     } catch (error) {
         console.log(error);

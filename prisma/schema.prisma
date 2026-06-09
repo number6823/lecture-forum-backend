@@ -53,9 +53,10 @@ model User {
   gender      GenderType
   role        RoleType   @default(USER) // 삽입할 때 기본값으로 USER 기록
 
-  posts   Post[]
-  votes   Vote[]
-  replies Reply[]
+  posts     Post[]
+  votes     Vote[]
+  replies   Reply[]
+  inquiries Inquiry[]
 }
 
 model Category {
@@ -155,3 +156,21 @@ model Notice {
 // 그렇게 적은 reply 테이블의 user라는 항목(칼럼)과 post라는 항목(칼럼)의 타입은 객체 타입
 // 즉, user와 post라는 항목의 타입인 객체는 데이터베이스에 들어갈 수 없음
 // 쟤네는 userId값을 가지고 User 테이블에서 데이터를 검색해와서 Prisma가 넣어주는(JOIN) 항목임
+
+model Inquiry {
+  id         Int       @id @default(autoincrement())
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  title      String // 사용자가 문의를 할 때 남겨야 되는 것
+  content    String
+  answer     String?
+  answeredAt DateTime?
+
+  // 사용자가 문의를 남길 떄에 필요한 정보는 title,content  => create를 할 것임
+  // 관리자가 문의 답변을 남길 때에는 answer를 받아서 => 지금 현재시간을 추가해서 update를 할 것임
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}

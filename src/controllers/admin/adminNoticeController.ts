@@ -5,7 +5,6 @@ const createNotice = async (req: Request, res: Response) => {
     try {
         const { title, content }: NoticeInputType = req.body;
         const result = await noticeService.createNotice(title, content);
-        await noticeService.createNotice(title, content);
         res.status(201).json({ message: "공지사항이 정상적으로 등록되었습니다.", data: result });
     } catch (error) {
         console.error(error);
@@ -45,9 +44,9 @@ const updateNotice = async (req: Request<{ noticeId: string }>, res: Response) =
     }
 };
 
-const deleteNotice = async (req: Request<{ requestId: string }>, res: Response) => {
+const deleteNotice = async (req: Request<{ noticeId: string }>, res: Response) => {
     try {
-        const id = Number(req.params.requestId);
+        const id = Number(req.params.noticeId);
         if (isNaN(id)) {
             res.status(400).json({
                 message: "유효하지 않은 공지사항 ID입니다.",
