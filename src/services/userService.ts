@@ -4,6 +4,7 @@ import { Prisma } from "../generated/prisma/client.ts";
 import { LoginInputType } from "../schemas/user/login.ts";
 import passwordUtil from "../utils/password/passwordUtil.ts";
 import jwtUtil from "../utils/jwt/jwtUtil.ts";
+import { UpdateUserInputType } from "../schemas/user/updateUserSchema.ts";
 
 const createUser = async (data: UserCreateInput) => {
     try {
@@ -96,8 +97,57 @@ const login = async (data: LoginInputType) => {
     // 에러를 Javascript Error 객체로 만들었기 때문에 그대로 controller로 보내도 됨
 };
 
+const updateUser = async (userId: number, input: UpdateUserInputType) => {
+    const existUser = await prisma.user.findUnique({
+        where: {
+            id: userId,
+            deletedAt: null,
+        },
+    });
+    if (!existUser || existUser.deletedAt) {
+        throw new Error("NOT_FOUND_USER");
+    }
+
+    // nickname에 unique
+    const existNickname = await prisma.user.findFirst({
+        where: {
+            nickname: input.nickname,
+            deletedAt: null,
+            id: {
+                not: userId
+            }
+        },
+    });
+
+    // email에 unique
+    const existEmail = await prisma.user.findFirst({
+        where: {
+            email: input.email,
+            deletedAt: null,
+            id: {
+                not: userId,
+            },
+        },
+    });
+    if (existEmail) {
+        throw new Error("DUPLICATED_EMAIL");
+    }
+
+    return prisma.user.update({
+        where: {
+            id: userId,
+        },
+        data: {
+            email: input.email,
+            nickname: input.nickname,
+            phoneNumber: input.phoneNumber ?? null,
+        },
+    });
+};
+
 export default {
     createUser,
     getUserById,
     login,
+    updateUser,
 };
