@@ -48,7 +48,7 @@ model User {
   name        String
   nickname    String     @unique
   email       String     @unique
-  phoneNumber String?
+  phoneNumber String
   birthdate   DateTime?
   gender      GenderType
   role        RoleType   @default(USER) // 삽입할 때 기본값으로 USER 기록
