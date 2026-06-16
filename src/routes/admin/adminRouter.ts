@@ -3,11 +3,18 @@ import adminNoticeRouter from "./notice/adminNoticeRouter.ts";
 import adminCategoryRouter from "./category/adminCategoryRouter.ts";
 import { Router } from "express";
 import adminInquiryRouter from "./inquiry/adminInquiryRouter.ts";
+import { authenticate, requiredAdmin } from "../../middlewares/auth.ts";
+import adminDashboardController from "../../controllers/admin/adminDashboardController.ts";
 
 const router = Router();
+
+router.use(authenticate);
+router.use(requiredAdmin);
 
 router.use("/category", adminCategoryRouter);
 router.use("/user", adminUserRouter);
 router.use("/notice", adminNoticeRouter);
 router.use("/inquiry", adminInquiryRouter);
+router.get("/summary", adminDashboardController.getDashboardSummary);
+
 export default router;
