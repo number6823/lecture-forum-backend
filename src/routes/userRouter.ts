@@ -10,11 +10,12 @@ import { updatePasswordSchema } from "../schemas/user/updatePasswordSchema.ts";
 
 const router = Router();
 
+router.get("/me",authenticate, userController.getMe)
 router.post("/create", validate(createUserSchema), userController.createUser);
 router.post("/login", validate(loginSchema), userController.login);
 router.patch("/update", authenticate,validate(updateUserSchema), userController.updateUser);
 router.patch("/password", authenticate,validate(updatePasswordSchema),userController.updatePassword)
-router.delete("/withdraw",authenticate,validate(WithdrawUserSchema),userController.withdrawUser )
+router.patch("/withdraw",authenticate,validate(WithdrawUserSchema),userController.withdrawUser )
 
 
 export default router;
