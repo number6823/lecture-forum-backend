@@ -1,6 +1,33 @@
 import prisma from "../config/prisma.ts";
 import { PostCreateInput } from "../generated/prisma/models/Post.ts";
 
+const getRecentPosts = async () => {
+    return prisma.post.findMany({
+        where: {
+            deletedAt: null,
+        },
+        orderBy: {
+            id: "desc",
+        },
+        take: 20,
+        include: {
+            user: {
+                select: {
+                    id: true,
+                    nickname: true,
+                    email: true,
+                },
+            },
+            category: {
+                select: {
+                    id: true,
+                    name: true,
+                },
+            },
+        },
+    });
+};
+
 const getPostsByCategory = async (categoryId: number, page: number, size: number) => {
     const skip = (page - 1) * size;
 
@@ -180,4 +207,5 @@ export default {
     getPostById,
     votePost,
     cancelVotePost,
+    getRecentPosts,
 };

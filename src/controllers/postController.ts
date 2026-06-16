@@ -5,6 +5,21 @@ import { PostCreateInput } from "../generated/prisma/models/Post.ts";
 import { AuthRequest } from "../middlewares/auth.ts";
 import { VotePostInputType } from "../schemas/post/votePostSchems.ts";
 
+const getRecentPosts = async (req: Request, res: Response) => {
+    try {
+        const result = await postService.getRecentPosts();
+        res.status(200).json({
+            message: "최근 게시물 조회에 성공했습니다.",
+            data: result,
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            message: "최근 게시물 조회 중 서버 오류가 발생되었습니다.",
+        });
+    }
+};
+
 const getPostsByCategory = async (req: Request<{ categoryId: string }>, res: Response) => {
     try {
         const categoryId = Number(req.params.categoryId);
@@ -211,4 +226,5 @@ export default {
     getPostById,
     votePost,
     cancelVotePost,
+    getRecentPosts,
 };
