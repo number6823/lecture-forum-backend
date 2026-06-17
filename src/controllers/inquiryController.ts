@@ -181,7 +181,7 @@ const deleteInquiry = async (req: AuthRequest<{ inquiryId: string }>, res: Respo
         }
 
         // 답변글이 존재하는지 체크
-        if (inquiry.answer) {
+        if (req.user.role !== "ADMIN" && inquiry.answer) {
             res.status(403).json({
                 message: "답변이 존재하는 문의글은 삭제할 수 없습니다.",
             });

@@ -125,8 +125,21 @@ const getPostById = async (postId: number, userId?: number) => {
         }
     }
 
+    await prisma.post.update({
+        where: {
+            id: postId,
+        },
+        data: {
+            views: post.views + 1,
+        },
+    });
+
+    // 이렇게 작성하면, getPostById 서비스가 불러와질 때마다 다른 조건 없이 조회수가 1씩 올라감.
+    // 만약, A 사용자가 이 글을 당일에 조회수 1만 올려지도록 할거라면 어떻게 해결해야할까??
+
     return {
         ...post,
+        views: post.views + 1,
         vote: {
             option1Count,
             option2Count,
